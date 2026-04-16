@@ -1,0 +1,33 @@
+node_modules
+.DS_Store
+
+# Instructor materials — NEVER push to student-facing repo
+_instructor/
+
+# Environment and secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Terraform state — must use remote backend
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+*.swp
+*.swo
+
+# Docker
+docker-compose.override.yml
+
+# Build artifacts
+dist/
+.next/

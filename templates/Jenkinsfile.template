@@ -1,0 +1,156 @@
+// TODO: Declarative pipeline for CI/CD
+// HINT: This template shows a basic structure with build, test, and deploy stages
+
+pipeline {
+  agent any
+
+  // TODO: Configure pipeline options (timeout, concurrent builds, etc.)
+  options {
+    timeout(time: 30, unit: 'MINUTES')
+    timestamps()
+  }
+
+  // TODO: Define environment variables for the entire pipeline
+  // HINT: Include registry URL, image tags, Kubernetes namespace, etc.
+  environment {
+    // TODO: Set your Docker registry URL
+    REGISTRY_URL = "TODO_AWS_ACCOUNT_ID.dkr.ecr.TODO_REGION.amazonaws.com"
+    // TODO: Set the image tag (consider using BUILD_NUMBER or GIT_COMMIT)
+    IMAGE_TAG = "latest"
+    // TODO: Set Kubernetes namespace
+    K8S_NAMESPACE = "default"
+    // TODO: Set Git repository branch for deployment
+    GIT_BRANCH = "main"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        script {
+          // TODO: Checkout code from your Git repository
+          // HINT: Jenkins has built-in Git plugin
+          echo 'Checking out code...'
+          // checkout([$class: 'GitSCM', branches: [[name: '${GIT_BRANCH}']], userRemoteConfigs: [[url: 'TODO_GIT_REPO_URL']]])
+        }
+      }
+    }
+
+    stage('Parallel Tasks') {
+      parallel {
+        stage('Lint') {
+          steps {
+            script {
+              // TODO: Run linting for each service
+              // HINT: Use eslint, tslint, or similar tools
+              // HINT: Run in each service directory (auth/, tickets/, orders/, payments/, expiration/, client/)
+              echo 'Running linters...'
+              // sh 'cd auth && npm run lint'
+              // sh 'cd tickets && npm run lint'
+              // ... etc for each service
+            }
+          }
+        }
+
+        stage('Test') {
+          steps {
+            script {
+              // TODO: Run unit tests for each service
+              // HINT: Use jest, mocha, or your chosen test framework
+              echo 'Running tests...'
+              // sh 'cd auth && npm run test'
+              // sh 'cd tickets && npm run test'
+              // ... etc for each service
+            }
+          }
+        }
+      }
+    }
+
+    stage('Build Images') {
+      steps {
+        script {
+          // TODO: Build Docker images for each service
+          // HINT: Tag images with REGISTRY_URL and IMAGE_TAG
+          echo 'Building Docker images...'
+
+          // TODO: Build auth service image
+          // HINT: docker build -t TODO_IMAGE_NAME:${IMAGE_TAG} ./auth
+
+          // TODO: Build tickets service image
+
+          // TODO: Build orders service image
+
+          // TODO: Build payments service image
+
+          // TODO: Build expiration service image
+
+          // TODO: Build client image
+
+          echo 'Docker images built successfully'
+        }
+      }
+    }
+
+    stage('Push to Registry') {
+      steps {
+        script {
+          // TODO: Authenticate to your Docker registry
+          // HINT: For AWS ECR, use: aws ecr get-login-password --region TODO_REGION | docker login --username AWS --password-stdin TODO_REGISTRY
+          echo 'Pushing images to registry...'
+
+          // TODO: Push each service image to the registry
+          // HINT: docker push TODO_REGISTRY_URL/auth:${IMAGE_TAG}
+
+          echo 'Images pushed successfully'
+        }
+      }
+    }
+
+    stage('Deploy to Kubernetes') {
+      // TODO: Add a condition to deploy only on specific branches
+      // HINT: when { branch 'main' }
+      steps {
+        script {
+          // TODO: Deploy to Kubernetes cluster
+          echo 'Deploying to Kubernetes...'
+
+          // TODO: Update Kubernetes manifests with the new image tags
+          // HINT: Use kubectl set image or apply new manifests
+          // HINT: Example: kubectl set image deployment/auth auth=TODO_REGISTRY/auth:${IMAGE_TAG} -n ${K8S_NAMESPACE}
+
+          // TODO: Verify deployment rollout
+          // HINT: kubectl rollout status deployment/auth -n ${K8S_NAMESPACE}
+
+          echo 'Deployment completed'
+        }
+      }
+    }
+
+    stage('Smoke Tests') {
+      steps {
+        script {
+          // TODO: Run smoke tests against deployed services
+          // HINT: Make HTTP requests to verify services are responding
+          echo 'Running smoke tests...'
+          // sh 'curl -f http://TODO_SERVICE_URL/health || exit 1'
+        }
+      }
+    }
+  }
+
+  // TODO: Add post-build actions (notifications, cleanup, etc.)
+  post {
+    always {
+      // TODO: Clean up workspace or generate reports
+      echo 'Pipeline execution completed'
+    }
+    success {
+      // TODO: Send success notification
+      echo 'Deployment successful!'
+    }
+    failure {
+      // TODO: Send failure notification
+      echo 'Deployment failed!'
+    }
+  }
+}

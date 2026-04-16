@@ -1,0 +1,54 @@
+# TODO: Choose a base image for Node.js (for build stage)
+# HINT: Use node:18-alpine or node:18-slim
+FROM node:18-alpine AS builder
+
+# TODO: Set working directory
+WORKDIR /app
+
+# TODO: Copy package files
+COPY package*.json ./
+
+# TODO: Install dependencies (including dev dependencies for Next.js build)
+RUN npm install
+
+# TODO: Copy the Next.js application source code
+# HINT: Include pages/, components/, public/, next.config.js, tsconfig.json, etc.
+COPY . .
+
+# TODO: Build the Next.js application
+# HINT: Your package.json may only have "dev": "next" script
+# HINT: You'll need to add a build script to package.json OR use "npx next build"
+RUN npm run build
+
+# ============================================================================
+# Production Stage
+# ============================================================================
+
+# TODO: Choose a lean base image for production
+# HINT: Use the same node version (18-alpine or 18-slim)
+FROM node:18-alpine
+
+# TODO: Create a non-root user for security
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+
+# TODO: Set working directory
+WORKDIR /app
+
+# TODO: Copy the build output from the builder stage
+# HINT: Next.js creates a .next folder in the root directory after build
+# HINT: Consider using standalone output for smaller images (requires next.config.js setup)
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+
+# TODO: Switch to the non-root user
+USER nodejs
+
+# TODO: Expose the port Next.js runs on
+# HINT: Next.js development server runs on port 3000 by default
+EXPOSE 3000
+
+# TODO: Set the command to start the Next.js application in production
+# HINT: Use "next start" to run the production build
+CMD ["npm", "start"]

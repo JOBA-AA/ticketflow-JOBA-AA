@@ -1,0 +1,97 @@
+# TODO: Replace TODO_SERVICE_NAME with the actual service name (auth, tickets, orders, payments, expiration, or client)
+# HINT: Create one Deployment for each microservice
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: TODO_SERVICE_NAME
+  namespace: default
+  labels:
+    app: TODO_SERVICE_NAME
+spec:
+  replicas: 1
+  # TODO: Update replicas for production (e.g., 2-3 for high availability)
+  selector:
+    matchLabels:
+      app: TODO_SERVICE_NAME
+  template:
+    metadata:
+      labels:
+        app: TODO_SERVICE_NAME
+    spec:
+      # TODO: Add any init containers if needed (e.g., database migrations)
+      # HINT: Init containers run before the main container starts
+      containers:
+      - name: TODO_SERVICE_NAME
+        # TODO: Replace with your Docker image URI
+        # HINT: Format is usually REGISTRY/SERVICE_NAME:TAG
+        # HINT: Example: 123456789.dkr.ecr.us-east-1.amazonaws.com/auth:latest
+        image: TODO_IMAGE_URI
+        # TODO: Set the image pull policy
+        # HINT: Use "Always" for development, "IfNotPresent" for production
+        imagePullPolicy: Always
+        # TODO: Expose the port the service listens on
+        # HINT: Backend services listen on port 3000; Next.js client on 3000
+        ports:
+        - containerPort: 3000
+          name: http
+        # TODO: Define environment variables for the service
+        # HINT: Include database URIs, API keys, service URLs, etc.
+        env:
+        - name: TODO_ENV_VAR_NAME
+          value: "TODO_VALUE"
+        # TODO: For sensitive data, use Kubernetes Secrets
+        # HINT: Example:
+        # - name: JWT_SECRET
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: TODO_SECRET_NAME
+        #       key: jwt-secret
+        # TODO: Add health checks (liveness and readiness probes)
+        # HINT: Probes help Kubernetes know when a pod is healthy
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        # TODO: Define resource requests and limits
+        # HINT: Requests tell Kubernetes what to reserve; limits cap usage
+        resources:
+          requests:
+            memory: "TODO_MEMORY_REQUEST"  # e.g., "128Mi"
+            cpu: "TODO_CPU_REQUEST"        # e.g., "100m"
+          limits:
+            memory: "TODO_MEMORY_LIMIT"    # e.g., "256Mi"
+            cpu: "TODO_CPU_LIMIT"          # e.g., "500m"
+      # TODO: Add affinity rules if needed for pod distribution
+      # HINT: Useful for spreading services across multiple nodes
+
+---
+# TODO: Create a ClusterIP Service to expose the Deployment internally
+# HINT: Kubernetes automatically discovers services via DNS
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: TODO_SERVICE_NAME-service
+  namespace: default
+  labels:
+    app: TODO_SERVICE_NAME
+spec:
+  type: ClusterIP
+  # TODO: Set the service port
+  # HINT: This is the port other services use to communicate
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: TODO_SERVICE_NAME

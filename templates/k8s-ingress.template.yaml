@@ -1,0 +1,99 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ticketing-ingress
+  namespace: default
+  # TODO: Add annotations if using a specific ingress controller
+  # HINT: For NGINX: kubernetes.io/ingress.class: nginx
+  # HINT: For AWS ALB: kubernetes.io/ingress.class: alb
+  annotations:
+    # TODO: Specify the ingress class if needed
+    # Example: kubernetes.io/ingress.class: nginx
+    # TODO: Add other annotations as needed (e.g., for SSL, CORS, etc.)
+spec:
+  # TODO: Configure TLS/HTTPS if needed
+  # HINT: You'll need a certificate (from cert-manager, AWS ACM, etc.)
+  # tls:
+  # - hosts:
+  #   - TODO_YOUR_DOMAIN
+  #   secretName: TODO_TLS_SECRET_NAME
+
+  rules:
+  # TODO: Set the host for your ingress
+  # HINT: Use your domain name or leave blank for all hosts
+  - host: TODO_YOUR_DOMAIN_OR_LEAVE_BLANK
+    http:
+      paths:
+      # ========================================
+      # Auth Service Routes
+      # ========================================
+      # TODO: Route /api/users/* to auth service
+      - path: /api/users
+        pathType: Prefix
+        backend:
+          service:
+            # TODO: Replace with the correct auth service name
+            name: TODO_AUTH_SERVICE_NAME
+            port:
+              number: 3000
+
+      # ========================================
+      # Tickets Service Routes
+      # ========================================
+      # TODO: Route /api/tickets/* to tickets service
+      - path: /api/tickets
+        pathType: Prefix
+        backend:
+          service:
+            # TODO: Replace with the correct tickets service name
+            name: TODO_TICKETS_SERVICE_NAME
+            port:
+              number: 3000
+
+      # ========================================
+      # Orders Service Routes
+      # ========================================
+      # TODO: Route /api/orders/* to orders service
+      - path: /api/orders
+        pathType: Prefix
+        backend:
+          service:
+            # TODO: Replace with the correct orders service name
+            name: TODO_ORDERS_SERVICE_NAME
+            port:
+              number: 3000
+
+      # ========================================
+      # Payments Service Routes
+      # ========================================
+      # TODO: Route /api/payments/* to payments service
+      - path: /api/payments
+        pathType: Prefix
+        backend:
+          service:
+            # TODO: Replace with the correct payments service name
+            name: TODO_PAYMENTS_SERVICE_NAME
+            port:
+              number: 3000
+
+      # ========================================
+      # Client (Next.js) Routes
+      # ========================================
+      # TODO: Route all other traffic (/*) to the Next.js client service
+      # HINT: This should be the last route (order matters)
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            # TODO: Replace with the correct client service name
+            name: TODO_CLIENT_SERVICE_NAME
+            port:
+              number: 3000
+
+  # TODO: Optional - Add default backend if no routes match
+  # HINT: This catches requests that don't match any path
+  # defaultBackend:
+  #   service:
+  #     name: TODO_CLIENT_SERVICE_NAME
+  #     port:
+  #       number: 3000

@@ -1,0 +1,58 @@
+# TODO: Choose an appropriate base image for Node.js development
+# HINT: Look for node:XX-alpine or node:XX-slim for smaller images
+FROM node:18-alpine AS builder
+
+# TODO: Set a working directory inside the container
+# HINT: Use /app or /build as your working directory
+WORKDIR /app
+
+# TODO: Copy package.json and package-lock.json from your service
+# HINT: This goes in the build stage to leverage Docker layer caching
+COPY package*.json ./
+
+# TODO: Install dependencies
+# HINT: Use npm install; this will install both dev and production deps
+RUN npm install
+
+# TODO: Copy the rest of your source code
+# HINT: This includes the src/ directory and tsconfig.json
+COPY . .
+
+# TODO: Compile TypeScript to JavaScript
+# HINT: Check your tsconfig.json to understand the output. You may need to run tsc or another build command.
+RUN npm run build || tsc
+
+# ============================================================================
+# Production Stage
+# ============================================================================
+
+# TODO: Choose a lean base image for production (same Node version as builder)
+# HINT: Use the same node:XX-alpine or node:XX-slim image
+FROM node:18-alpine
+
+# TODO: Create a non-root user to run the application
+# HINT: Use RUN addgroup and adduser commands for security
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+
+# TODO: Set working directory
+WORKDIR /app
+
+# TODO: Copy only the compiled JavaScript from the builder stage
+# HINT: Use COPY --from=builder to copy from the previous stage
+# HINT: You'll need to copy dist/ or build/ (depending on your tsconfig output)
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+
+# TODO: Switch to the non-root user
+# HINT: Use USER nodejs
+USER nodejs
+
+# TODO: Expose the port your service listens on
+# HINT: All backend services listen on port 3000
+EXPOSE 3000
+
+# TODO: Set the default command to start your application
+# HINT: Your compiled JS is in dist/ (or your configured outDir)
+# HINT: The entry point is typically dist/index.js
+CMD ["node", "dist/index.js"]

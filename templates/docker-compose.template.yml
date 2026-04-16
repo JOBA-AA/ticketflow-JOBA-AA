@@ -1,0 +1,161 @@
+version: '3.8'
+
+services:
+  # ========================================
+  # Backend Microservices
+  # ========================================
+
+  auth:
+    # TODO: Specify the build context and Dockerfile for the auth service
+    # HINT: build: { context: ./auth, dockerfile: Dockerfile }
+    build:
+      # TODO: Fill in the context path
+      context:
+      # TODO: Fill in the Dockerfile name if not using default "Dockerfile"
+      dockerfile: Dockerfile
+    # TODO: Map the container port to a host port
+    # HINT: Format is "HOST_PORT:CONTAINER_PORT"
+    # HINT: All backend services listen on 3000 inside the container
+    ports:
+      - "3000:3000"
+    # TODO: Define environment variables needed by the auth service
+    # HINT: Auth service likely needs MONGO_URI, JWT_SECRET, PORT, etc.
+    environment:
+      # TODO: Add environment variables here
+    depends_on:
+      - auth-mongo
+      - nats
+
+  tickets:
+    # TODO: Specify build context and Dockerfile
+    build:
+      context:
+      dockerfile: Dockerfile
+    # TODO: Map ports (use a different host port than auth to avoid conflicts)
+    ports:
+      - "3001:3000"
+    # TODO: Define environment variables
+    environment:
+      # TODO: Add environment variables here
+    depends_on:
+      - tickets-mongo
+      - nats
+
+  orders:
+    # TODO: Specify build context and Dockerfile
+    build:
+      context:
+      dockerfile: Dockerfile
+    # TODO: Map ports
+    ports:
+      - "3002:3000"
+    # TODO: Define environment variables
+    environment:
+      # TODO: Add environment variables here
+    depends_on:
+      - orders-mongo
+      - nats
+
+  payments:
+    # TODO: Specify build context and Dockerfile
+    build:
+      context:
+      dockerfile: Dockerfile
+    # TODO: Map ports
+    ports:
+      - "3003:3000"
+    # TODO: Define environment variables
+    environment:
+      # TODO: Add environment variables here
+    depends_on:
+      - payments-mongo
+      - nats
+
+  expiration:
+    # TODO: Specify build context and Dockerfile
+    build:
+      context:
+      dockerfile: Dockerfile
+    # TODO: Note: This service has NO HTTP server, so no ports needed
+    # TODO: Define environment variables
+    environment:
+      # TODO: Add environment variables here
+    depends_on:
+      - nats
+
+  # ========================================
+  # Client Service (Next.js)
+  # ========================================
+
+  client:
+    # TODO: Specify build context and Dockerfile for Next.js client
+    build:
+      context:
+      dockerfile: Dockerfile
+    # TODO: Map the client port (Next.js typically runs on 3000)
+    ports:
+      - "3100:3000"
+    # TODO: Define environment variables for the client if needed
+    environment:
+      # TODO: Add environment variables (e.g., API_URL, etc.)
+
+  # ========================================
+  # MongoDB Instances (One per Service)
+  # ========================================
+
+  auth-mongo:
+    # TODO: Use the MongoDB image
+    image: mongo:latest
+    # TODO: Expose MongoDB port (default 27017)
+    ports:
+      - "27017:27017"
+    # TODO: Optional: Set environment variables or volumes for persistence
+    # HINT: Consider mounting a volume for data persistence
+
+  tickets-mongo:
+    # TODO: Use the MongoDB image
+    image: mongo:latest
+    ports:
+      - "27018:27017"
+
+  orders-mongo:
+    # TODO: Use the MongoDB image
+    image: mongo:latest
+    ports:
+      - "27019:27017"
+
+  payments-mongo:
+    # TODO: Use the MongoDB image
+    image: mongo:latest
+    ports:
+      - "27020:27017"
+
+  # ========================================
+  # Redis
+  # ========================================
+
+  redis:
+    # TODO: Use the Redis image
+    image: redis:latest
+    # TODO: Expose Redis port (default 6379)
+    ports:
+      - "6379:6379"
+
+  # ========================================
+  # NATS Streaming Server (Message Broker)
+  # ========================================
+
+  nats:
+    # TODO: Use the NATS Streaming image
+    # HINT: Consider using nats:latest or nats:2-alpine
+    image: nats:latest
+    # TODO: Expose NATS port (default 4222)
+    ports:
+      - "4222:4222"
+    # TODO: Add any NATS-specific flags or environment variables if needed
+    # HINT: You may want to enable clustering or set other options
+
+  # ========================================
+  # Optional: Add more infrastructure services as needed
+  # ========================================
+  # TODO: Add any additional services (logging, monitoring, etc.)
