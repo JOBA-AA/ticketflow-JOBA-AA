@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+
+  # ── Databases ──────────────────────────────────────────────
+  auth-mongo:
+    image: mongo:6
+    volumes:
+      - auth-mongo-data:/data/db
+
+  tickets-mongo:
+    image: mongo:6
+    volumes:
+      - tickets-mongo-data:/data/db
+
+  orders-mongo:
+    image: mongo:6
+    volumes:
+      - orders-mongo-data:/data/db
+
+  payments-mongo:
+    image: mongo:6
+    volumes:
+      - payments-mongo-data:/data/db
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - '3000:80'
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - auth
+      - tickets
+      - orders
+      - payments    
+
+  # ── NATS Streaming Server ──────────────────────────────────
+  nats-srv:
+    image: nats-streaming:0.25.6
+    command:
+      - '-p'
+      - '4222'
+      - '-m'
+      - '8222'
+      - '-hbi'
+      - '5s'
+      - '-hbt'
+      - '5s'
+      - '-hbf'
+      - '2'
+      - '-SD'
+      - '-cid'
+      - 'ticketflow'
+
+  # ── Redis for expiration ───────────────────────────────────
+  expiration-redis:
+    image: redis:7-alpine
+
+  # ── Microservices ──────────────────────────────────────────
+  auth:
+    image: ticketflow-auth
+    environment:
+      - JWT_KEY=mysecretjwtkey
+      - MONGO_URI=mongodb://auth-mongo:27017/auth
+    depends_on:
+      - auth-mongo
+
+  tickets:
+    image: ticketflow-tickets
+    environment:
+      - JWT_KEY=mysecretjwtkey
+      - MONGO_URI=mongodb://tickets-mongo:27017/tickets
+      - NATS_URL=nats://nats-srv:4222
+      - NATS_CLUSTER_ID=ticketflow
+      - NATS_CLIENT_ID=tickets
+    depends_on:
+      - tickets-mongo
+      - nats-srv
+
+  orders:
+    image: ticketflow-orders
+    environment:
+      - JWT_KEY=mysecretjwtkey
+      - MONGO_URI=mongodb://orders-mongo:27017/orders
+      - NATS_URL=nats://nats-srv:4222
+      - NATS_CLUSTER_ID=ticketflow
+      - NATS_CLIENT_ID=orders
+    depends_on:
+      - orders-mongo
+      - nats-srv
+
+  payments:
+    image: ticketflow-payments
+    environment:
+      - JWT_KEY=mysecretjwtkey
+      - STRIPE_KEY=sk_test_your_stripe_key_here
+      - MONGO_URI=mongodb://payments-mongo:27017/payments
+      - NATS_URL=nats://nats-srv:4222
+      - NATS_CLUSTER_ID=ticketflow
+      - NATS_CLIENT_ID=payments
+    depends_on:
+      - payments-mongo
+      - nats-srv
+
+  expiration:
+    image: ticketflow-expiration
+    environment:
+      - NATS_URL=nats://nats-srv:4222
+      - NATS_CLUSTER_ID=ticketflow
+      - NATS_CLIENT_ID=expiration
+      - REDIS_HOST=expiration-redis
+    depends_on:
+      - nats-srv
+      - expiration-redis
+
+  client:
+    image: ticketflow-client
+    environment:
+      - NODE_OPTIONS=--openssl-legacy-provider
+      - API_URL=http://nginx:80
+
+# ── Volumes ────────────────────────────────────────────────
+volumes:
+  auth-mongo-data:
+  tickets-mongo-data:
+  orders-mongo-data:
+  payments-mongo-data: 
