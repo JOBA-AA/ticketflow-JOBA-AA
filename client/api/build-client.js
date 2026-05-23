@@ -2,16 +2,13 @@ import axios from 'axios';
 
 export default ({ req }) => {
   if (typeof window === 'undefined') {
-    // We are on the server - use internal service routing
-    const baseURL = process.env.API_URL || 
-      'http://ingress-nginx-controller.ingress-nginx.svc.cluster.local';
-    
+    // Server side - route through ingress nginx internal hostname
     return axios.create({
-      baseURL,
+      baseURL: 'http://ingress-nginx-controller.ingress-nginx.svc.cluster.local',
       headers: req.headers,
     });
   } else {
-    // We must be on the browser
+    // Browser side - go through ingress
     return axios.create({
       baseURL: '/',
     });
