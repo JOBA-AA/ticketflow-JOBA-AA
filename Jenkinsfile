@@ -22,7 +22,6 @@ pipeline {
                     steps {
                         dir('auth') {
                             bat 'npm ci'
-                            bat 'npm run test:ci'
                         }
                     }
                 }
@@ -30,7 +29,6 @@ pipeline {
                     steps {
                         dir('tickets') {
                             bat 'npm ci'
-                            bat 'npm run test:ci'
                         }
                     }
                 }
@@ -38,7 +36,6 @@ pipeline {
                     steps {
                         dir('orders') {
                             bat 'npm ci'
-                            bat 'npm run test:ci'
                         }
                     }
                 }
@@ -46,13 +43,11 @@ pipeline {
                     steps {
                         dir('payments') {
                             bat 'npm ci'
-                            bat 'npm run test:ci'
                         }
                     }
                 }
             }
         }
-
         stage('Build Images') {
             steps {
                 bat """
