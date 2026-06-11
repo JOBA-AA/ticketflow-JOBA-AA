@@ -50,6 +50,9 @@ pipeline {
         }
         stage('Build Images') {
             steps {
+                dir('client') {
+                    bat 'npm install'
+                }
                 bat """
                     docker build -t %DOCKER_USERNAME%/ticketflow-auth:%TAG% ./auth
                     docker build -t %DOCKER_USERNAME%/ticketflow-tickets:%TAG% ./tickets
@@ -60,7 +63,6 @@ pipeline {
                 """
             }
         }
-
         stage('Push to Registry') {
             steps {
                 bat """
