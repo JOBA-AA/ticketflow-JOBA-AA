@@ -65,8 +65,8 @@ pipeline {
         }
         stage('Push to Registry') {
             steps {
+                bat "docker login -u %DOCKER_HUB_CREDENTIALS_USR% -p %DOCKER_HUB_CREDENTIALS_PSW%"
                 bat """
-                    echo %DOCKER_HUB_CREDENTIALS_PSW% | docker login -u %DOCKER_HUB_CREDENTIALS_USR% --password-stdin
                     docker push %DOCKER_USERNAME%/ticketflow-auth:%TAG%
                     docker push %DOCKER_USERNAME%/ticketflow-tickets:%TAG%
                     docker push %DOCKER_USERNAME%/ticketflow-orders:%TAG%
