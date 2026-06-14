@@ -1,7 +1,7 @@
 resource "aws_eks_cluster" "ticketflow" {
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
-  version  = "1.29"
+  version  = "1.32"
 
   vpc_config {
     subnet_ids              = concat(
