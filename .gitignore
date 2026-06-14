@@ -16,6 +16,14 @@ _instructor/
 .terraform/
 .terraform.lock.hcl
 
+# Terraform
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+!*.tfvars.example
+
 # IDE
 .vscode/
 .idea/
@@ -31,3 +39,4 @@ docker-compose.override.yml
 # Build artifacts
 dist/
 .next/
+
